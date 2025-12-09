@@ -1,22 +1,67 @@
-## Terraform Download Once
+# Terraform Download Once
 
+A Terraform module for downloading files atomically with deduplication. Prevents redundant downloads when multiple resources reference the same file.
 
-### Overview
+## Overview
 
-This module is a utility to download a list of files to a directory on the target host. It ensures
-that the file is only downloaded once in an atomic way (no partial files when interrupted for example).
-The files to be downloaded are most likely specified multiple times (duplicated) so it's important
-to get this right in a multithreaded scenario.
+This module downloads a list of files to a destination directory, ensuring:
 
-Eg, we have a list of terraform resources that use a base vm image (a qcow2 file) that is named after
-its contents md5 hash (eg, d3b07384d113edec49eaa6238ad5ff00.qcow2). This allows us to launch many
-VMs (for example) using the same base image. In this example, each vm keeps track of what md5sum
-its base image is, and if the file doesn't exist, it downloads  it first. The issue this module
-aims to solve is that when we launch many vms, we get into a race condition where each vm sees
-it's base image is missing and downloads the same file (for the simple case of all vms sharing
-the same base image md5), because it doesn't know about the other downloads (it's multiple threads).
-Even though we right to a temporary file first then use an atomic rename, each ends up being
-downloaded at the same time many times over bringing the network bandwidth to a crawl. One way
-to solve this is to have something else (this module!) manage a list of images and it can go throuh
-and download the unique images once.
+- **Atomic downloads** - Files are downloaded to a temp file first, then atomically renamed to prevent partial files
+- **Deduplication** - Files with the same MD5 hash are downloaded only once, even if specified multiple times
+- **Concurrency safety** - Uses `flock` to prevent race conditions when multiple Terraform runs attempt to download the same file
+- **MD5 verification** - Downloaded files are verified against their expected MD5 hash
 
+### Use Case
+
+When launching multiple VMs that share a base image (e.g., a qcow2 file named by its MD5 hash), each VM resource might trigger a download if the file doesn't exist. Without coordination, this causes redundant downloads that saturate network bandwidth. This module centralizes file management to download each unique file exactly once.
+
+## Usage
+
+```hcl
+module "download_images" {
+  source = "path/to/terraform-download-once"
+
+  destination_dir = "/var/lib/images"
+
+  files = [
+    {
+      url = "https://example.com/images/base.qcow2"
+      md5 = "d3b07384d113edec49eaa6238ad5ff00"
+    },
+    {
+      url = "https://example.com/images/base.qcow2"
+      md5 = "d3b07384d113edec49eaa6238ad5ff00"  # Duplicate - will only download once
+    },
+  ]
+}
+```
+
+## Inputs
+
+| Name | Description | Type | Required |
+|------|-------------|------|----------|
+| `destination_dir` | Directory where files will be downloaded | `string` | Yes |
+| `files` | List of files to download with `url` and `md5` | `list(object({url=string, md5=string}))` | No |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| `downloaded_files` | Map of MD5 to file information (filename, path, url) |
+| `destination_dir` | The destination directory |
+
+## Requirements
+
+- Terraform >= 1.0
+- `curl` and `flock` available on the system running Terraform
+
+## Development
+
+```bash
+make init      # Initialize terraform
+make fmt       # Format terraform files
+make validate  # Validate configuration
+make lint      # Run tflint
+make test      # Run tests
+make clean     # Clean up test artifacts
+```
