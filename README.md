@@ -19,7 +19,7 @@ When launching multiple VMs that share a base image (e.g., a qcow2 file named by
 
 ```hcl
 module "download_images" {
-  source = "path/to/terraform-download-once"
+  source = "path/to/tf-module-dlonce"
 
   destination_dir = "/var/lib/images"
 

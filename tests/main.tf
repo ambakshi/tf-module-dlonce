@@ -1,4 +1,4 @@
-# Test configuration for terraform-download-once module
+# Test configuration for tf-module-dlonce module
 
 terraform {
   required_version = ">= 1.0"
