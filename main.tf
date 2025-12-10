@@ -32,10 +32,12 @@ resource "terraform_data" "download" {
     host                = var.ssh_host
     user                = var.ssh_user
     private_key         = var.ssh_private_key
+    certificate         = var.ssh_certificate
     port                = var.ssh_port
     bastion_host        = var.ssh_bastion_host
     bastion_user        = var.ssh_bastion_user
     bastion_private_key = var.ssh_bastion_private_key
+    bastion_certificate = var.ssh_bastion_certificate
     bastion_port        = var.ssh_bastion_port
   }
 

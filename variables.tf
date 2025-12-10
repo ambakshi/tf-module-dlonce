@@ -36,6 +36,13 @@ variable "ssh_private_key_file" {
   default     = null
 }
 
+variable "ssh_certificate" {
+  description = "The SSH certificate for authentication (content, not path). Used with ssh_private_key."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "ssh_port" {
   description = "The SSH port on the remote server"
   type        = number
@@ -56,6 +63,13 @@ variable "ssh_bastion_user" {
 
 variable "ssh_bastion_private_key" {
   description = "The private SSH key for bastion authentication (content, not path)"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "ssh_bastion_certificate" {
+  description = "The SSH certificate for bastion authentication (content, not path). Used with ssh_bastion_private_key."
   type        = string
   default     = null
   sensitive   = true
