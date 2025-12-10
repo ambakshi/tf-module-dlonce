@@ -49,6 +49,12 @@ variable "ssh_port" {
   default     = 22
 }
 
+variable "ssh_agent" {
+  description = "Whether to use the SSH agent for authentication. Defaults to false if any keys are specified."
+  type        = bool
+  default     = null
+}
+
 variable "ssh_bastion_host" {
   description = "The hostname or IP of a bastion/jump host (optional)"
   type        = string

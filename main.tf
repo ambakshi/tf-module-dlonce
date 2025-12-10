@@ -34,6 +34,7 @@ resource "terraform_data" "download" {
     private_key         = var.ssh_private_key
     certificate         = var.ssh_certificate
     port                = var.ssh_port
+    agent               = var.ssh_agent != null ? var.ssh_agent : (var.ssh_private_key != null || var.ssh_private_key_file != null ? false : null)
     bastion_host        = var.ssh_bastion_host
     bastion_user        = var.ssh_bastion_user
     bastion_private_key = var.ssh_bastion_private_key
